@@ -2,7 +2,7 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Migration_Add_user_monster_link extends CI_Migration {
+class Migration_Add_fight_room_monsters extends CI_Migration {
 
     public function up()
     {
@@ -12,6 +12,11 @@ class Migration_Add_user_monster_link extends CI_Migration {
                 'constraint' => 5,
                 'unsigned' => TRUE,
                 'auto_increment' => TRUE
+            ),
+            'fight_room_id' => array(
+                'type' => 'INT',
+                'constraint' => 5,
+                'unsigned' => TRUE,
             ),
             'user_id' => array(
                 'type' => 'INT',
@@ -23,27 +28,15 @@ class Migration_Add_user_monster_link extends CI_Migration {
                 'constraint' => 5,
                 'unsigned' => TRUE,
             ),
-            'monster_lvl' => array(
-                'type' => 'INT',
-                'constraint' => 5,
-                'unsigned' => TRUE,
-            ),
-            'monster_exp' => array(
-                'type' => 'INT',
-                'constraint' => 11,
-                'unsigned' => TRUE,
-            ),
-            'monster_name' => array(
-                'type' => 'TEXT',
-                'constraint' => '100'
-            ),
+
+
         ));
         $this->dbforge->add_key('id', TRUE);
-        $this->dbforge->create_table('users_monster');
+        $this->dbforge->create_table('fight_room_monsters');
     }
 
     public function down()
     {
-        $this->dbforge->drop_table('users_monster');
+        $this->dbforge->drop_table('fight_room_monsters');
     }
 }

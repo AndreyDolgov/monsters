@@ -11,12 +11,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Fight_controller extends CI_Controller {
 
-      
+
     public function fight_action(){
 
     }
 
-    public function make_room(){
+    public function change_monster(){
 
     }
+
 }

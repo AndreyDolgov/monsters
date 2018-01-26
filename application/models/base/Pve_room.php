@@ -18,6 +18,7 @@ class Pve_room extends Room_base
 
     public function __construct()
     {
+        parent::__construct();
         $this->has_ai = true;
     }
 }

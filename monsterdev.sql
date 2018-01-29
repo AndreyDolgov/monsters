@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: 127.0.0.1:3307
--- Время создания: Янв 29 2018 г., 11:36
+-- Время создания: Янв 29 2018 г., 11:49
 -- Версия сервера: 5.5.53-log
 -- Версия PHP: 5.6.29
 
@@ -29,6 +29,8 @@ SET time_zone = "+00:00";
 CREATE TABLE `fight_rooms` (
   `id` int(5) UNSIGNED NOT NULL,
   `session_id` varchar(40) NOT NULL,
+  `user_1_id` int(11) NOT NULL,
+  `user_2_id` int(11) NOT NULL,
   `status` int(5) UNSIGNED NOT NULL,
   `room_type` int(5) UNSIGNED NOT NULL,
   `round_number` int(5) UNSIGNED NOT NULL,

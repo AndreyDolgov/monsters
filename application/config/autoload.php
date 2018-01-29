@@ -139,4 +139,9 @@ $autoload['language'] = array();
 
 $autoload['model'] = array(
     'fight_room_classic',
+    'room_base',
+    'fight_session',
+    'monster',
+    'user_monster',
+    'scramble',
 );

@@ -8,7 +8,7 @@
  */
 
 
-abstract class Room_base extends CI_Model
+class Room_base extends CI_Model
 {
     /**
      * @var int $count_of_users - how many users can be in room
@@ -35,8 +35,54 @@ abstract class Room_base extends CI_Model
      */
     protected $has_ai;
 
+    /**
+     * @var varchar $table_name - room table name
+     */
+    protected $table_name;
+
+    /**
+     * @var int $room_type - room type index
+     */
+    protected $room_type;
+
     public function __construct()
     {
         parent::__construct();
     }
+
+    public function check_room_exist($user_1_id,$user_2_id){
+
+        $res = $this->db->select('session_id')
+            ->from($this->table_name)
+            ->where(array(
+                'room_type'=>$this->room_type,
+                'user_1_id'=>$user_1_id,
+                'user_2_id'=>$user_2_id,
+            ))
+            ->where('status !='. ROOM_STATUS_CLOSED)
+            ->get()
+            ->result();
+
+        return (count($res) > 0)? $res[0]->session_id:false;
+    }
+
+    public function make_room($user_1_id,$user_2_id){
+        $_session_id = time() .'_'. $user_1_id .'_'. $user_2_id;
+        $_id = $this->db->insert($this->table_name, array(
+            'session_id'=>$_session_id,
+            'user_1_id'=>$user_1_id,
+            'user_2_id'=>$user_2_id,
+            'status'=>ROOM_STATUS_NEW,
+            'room_type'=>$this->room_type,
+        ));
+
+        return $_session_id;
+
+    }
+
+    public function close_room($session_id,$status,$winner){
+
+        $this->db->where(array('session_id' => $session_id))->update($this->table_name,array('status'=>$status,'winner_id'=>$winner,'closed_at'=>'now()'));
+    }
+
 }

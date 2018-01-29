@@ -83,3 +83,15 @@ defined('EXIT_USER_INPUT')     OR define('EXIT_USER_INPUT', 7); // invalid user 
 defined('EXIT_DATABASE')       OR define('EXIT_DATABASE', 8); // database error
 defined('EXIT__AUTO_MIN')      OR define('EXIT__AUTO_MIN', 9); // lowest automatically-assigned error code
 defined('EXIT__AUTO_MAX')      OR define('EXIT__AUTO_MAX', 125); // highest automatically-assigned error code
+
+
+define('ROOM_STATUS_NEW',0);
+define('ROOM_STATUS_ACTIVE',1);
+define('ROOM_STATUS_CLOSED',2);
+
+define('LVL_MONSTER_COEFFICIENT_HEALTH',1.5);
+define('LVL_MONSTER_COEFFICIENT_POWER',1.5);
+define('LVL_ABILITY_COEFFICIENT_DAMAGE',1.5);
+define('LVL_ABILITY_COEFFICIENT_HEALING',1.5);
+define('LVL_ABILITY_COEFFICIENT_DURATION',1.5);
+define('HEALTH_EXP',10);

@@ -2,7 +2,7 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Migration_Add_users extends CI_Migration {
+class Migration_Add_fight_sessions extends CI_Migration {
 
     public function up()
     {
@@ -13,22 +13,24 @@ class Migration_Add_users extends CI_Migration {
                 'unsigned' => TRUE,
                 'auto_increment' => TRUE
             ),
-            'user_name' => array(
+            'room_type' => array(
                 'type' => 'VARCHAR',
-                'constraint' => '100'
+                'constraint' => '20'
             ),
-            'user_password' => array(
-                'type' => 'TEXT',
-                'constraint' => '100'
+            'session_id' => array(
+                'type' => 'VARCHAR',
+                'constraint' => '40'
+            ),
+            'session_data' => array(
+                'type' => 'LONGTEXT',
             ),
         ));
         $this->dbforge->add_key('id', TRUE);
-        $this->dbforge->create_table('users');
-        $this->db->query("INSERT INTO `users` (`id`, `user_name`, `user_password`) VALUES (NULL, 'adam', ''), (NULL, 'eva', '');");
+        $this->dbforge->create_table('fight_sessions');
     }
 
     public function down()
     {
-        $this->dbforge->drop_table('users');
+        $this->dbforge->drop_table('fight_sessions');
     }
 }

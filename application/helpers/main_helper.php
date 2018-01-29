@@ -13,3 +13,11 @@ if(!function_exists('get_user')){
         //подразумеваем, что есть функционал для авторизации и пользователи у нас уже авторизированы
     }
 }
+
+if(!function_exists('error')){
+    function error($mess)
+    {
+        echo $mess;
+        die();
+    }
+}

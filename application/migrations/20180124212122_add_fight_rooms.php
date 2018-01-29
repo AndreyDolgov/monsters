@@ -15,7 +15,15 @@ class Migration_Add_fight_rooms extends CI_Migration {
             ),
             'session_id' => array(
                 'type' => 'VARCHAR',
-                'constraint' => '20'
+                'constraint' => '40'
+            ),
+            'user_1_id' => array(
+                'constraint' => 5,
+                'unsigned' => TRUE,
+            ),
+            'user_2_id' => array(
+                'constraint' => 5,
+                'unsigned' => TRUE,
             ),
             'status' => array(
                 'type' => 'INT',

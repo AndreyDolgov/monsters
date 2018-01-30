@@ -50,6 +50,8 @@ class Room_base extends CI_Model
         parent::__construct();
     }
 
+    //упрощенная версия
+    //должны быть проверки на протухшую сессию, на возможность создания одим пользователем множества сессий и т.д.
     public function check_room_exist($user_1_id,$user_2_id){
 
         $res = $this->db->select('session_id')

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: 127.0.0.1:3307
--- Время создания: Янв 29 2018 г., 11:49
+-- Время создания: Янв 30 2018 г., 10:41
 -- Версия сервера: 5.5.53-log
 -- Версия PHP: 5.6.29
 
@@ -49,7 +49,8 @@ CREATE TABLE `fight_sessions` (
   `id` int(5) UNSIGNED NOT NULL,
   `room_type` varchar(20) NOT NULL,
   `session_id` varchar(40) NOT NULL,
-  `session_data` longtext NOT NULL
+  `session_data` longtext NOT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -9215,6 +9216,19 @@ INSERT INTO `users` (`id`, `user_name`, `user_password`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Структура таблицы `users_experience`
+--
+
+CREATE TABLE `users_experience` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `room_id` int(11) NOT NULL,
+  `value` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Структура таблицы `users_monsters`
 --
 
@@ -9281,6 +9295,12 @@ ALTER TABLE `users`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Индексы таблицы `users_experience`
+--
+ALTER TABLE `users_experience`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Индексы таблицы `users_monsters`
 --
 ALTER TABLE `users_monsters`
@@ -9294,12 +9314,12 @@ ALTER TABLE `users_monsters`
 -- AUTO_INCREMENT для таблицы `fight_rooms`
 --
 ALTER TABLE `fight_rooms`
-  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 --
 -- AUTO_INCREMENT для таблицы `fight_sessions`
 --
 ALTER TABLE `fight_sessions`
-  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 --
 -- AUTO_INCREMENT для таблицы `monster_ability_link`
 --
@@ -9315,6 +9335,11 @@ ALTER TABLE `monster_base`
 --
 ALTER TABLE `users`
   MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+--
+-- AUTO_INCREMENT для таблицы `users_experience`
+--
+ALTER TABLE `users_experience`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT для таблицы `users_monsters`
 --

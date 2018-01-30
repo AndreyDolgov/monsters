@@ -15,11 +15,10 @@ class Monster extends Monster_Base
     protected $table_monster_info = 'monster_base';
     protected $table_monster_ability = 'monster_ability';
     protected $table_monster_ability_link = 'monster_ability_link';
-    public function __construct()
-    {
+    public function __construct(){
+
         parent::__construct();
     }
-
 
     public function get_full_info($_monster_id){
 

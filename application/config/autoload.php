@@ -144,4 +144,5 @@ $autoload['model'] = array(
     'monster',
     'user_monster',
     'scramble',
+    'experience',
 );

@@ -17,11 +17,10 @@ class User_monster extends CI_Model
     protected $table_name = 'users_monsters';
 
 
-    public function __construct()
-    {
+    public function __construct(){
+
         parent::__construct();
     }
-
 
     public function get_fight_monsters($user_id){
 

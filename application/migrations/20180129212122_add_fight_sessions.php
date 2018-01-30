@@ -24,6 +24,10 @@ class Migration_Add_fight_sessions extends CI_Migration {
             'session_data' => array(
                 'type' => 'LONGTEXT',
             ),
+            'status' => array(
+                'type' => 'TINYINT',
+                'constraint' => 4,
+            ),
         ));
         $this->dbforge->add_key('id', TRUE);
         $this->dbforge->create_table('fight_sessions');

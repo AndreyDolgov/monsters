@@ -28,7 +28,6 @@ class Room_controller extends CI_Controller
         $_room = $this->{$this->room_type_classes[$room_type]};
 
         $_session_id = $_room->check_room_exist($user_1_id,$user_2_id);
-
         if($_session_id === false){
             $_session_id = $_room->make_room($user_1_id,$user_2_id);
         }
@@ -41,94 +40,98 @@ class Room_controller extends CI_Controller
 
     public function make_fight_session($session_id,$user_1_id, $user_2_id,$room_type){
 
-        $room = $this->fight_session->check_fight_session_data($session_id);
-
-        if($room === false){
-            $room = $this->fight_session->make_fight_session_data($session_id,$user_1_id, $user_2_id,$room_type);
-        }
+        $_fight = $this->fight_session;
+        $_fight->init_fight_session_data($session_id,$user_1_id, $user_2_id,$room_type);
 
         echo 'Users in fight!'. PHP_EOL;
 
-        $this->_users_actions($room['session_data']);
+        $_fight->_users_actions();
     }
 
     public function action_fight($session_id, $attack_user_id, $skill_id){
 
-        $room = $this->fight_session->check_fight_session_data($session_id);
-        $this->_security_method($room, $attack_user_id);
+        $_fight = $this->fight_session;
+        $_fight->init_fight($session_id);
+        $_fight->_security_method($attack_user_id);
 
-        $_attack_user = $room['session_data']['users'][$attack_user_id];
-        $_attack_monster_id = $room['session_data']['statuses']['user_'. $attack_user_id .'_active_monster'];
-        $_attack_monster = $_attack_user[$_attack_monster_id];
+        $_attack_user = $_fight->session_data->users->{$attack_user_id};
+        $_attack_monster_id = $_fight->session_data->statuses->{'user_'. $attack_user_id .'_active_monster'};
+        $_attack_monster = $_attack_user->{$_attack_monster_id};
 
-        if(!isset($_attack_monster['fight_data']['skills'][$skill_id])){
+        if(!isset($_attack_monster->fight_data->skills->{$skill_id})){
             error('Error. You monster haven`t this skill');
         }
 
-        $_defence_user_id = ($room['session_data']['statuses']['users'][0] == $attack_user_id)?$room['session_data']['statuses']['users'][1]:$room['session_data']['statuses']['users'][0];
-        $_defence_user = $room['session_data']['users'][$_defence_user_id];
-        $_defence_monster_id = $room['session_data']['statuses']['user_'. $_defence_user_id .'_active_monster'];
-        $_defence_monster = $_defence_user[$_defence_monster_id];
+        $_defence_user_id = ($_fight->session_data->statuses->users[0] == $attack_user_id)?$_fight->session_data->statuses->users[1]:$_fight->session_data->statuses->users[0];
+        $_defence_user = $_fight->session_data->users->{$_defence_user_id};
+        $_defence_monster_id = $_fight->session_data->statuses->{'user_'. $_defence_user_id .'_active_monster'};
+        $_defence_monster = $_defence_user->{$_defence_monster_id};
         $scramble_result = $this->scramble->monster_fight($_attack_monster,$skill_id,$_defence_monster);
-        $room['session_data']['users'][$attack_user_id][$_attack_monster_id] = $scramble_result['attack_monster'];
-        $room['session_data']['users'][$_defence_user_id][$_defence_monster_id] = $scramble_result['defence_monster'];
+        $_fight->session_data->users->{$attack_user_id}->{$_attack_monster_id} = $scramble_result['attack_monster'];
+        $_fight->session_data->users->{$_defence_user_id}->{$_defence_monster_id} = $scramble_result['defence_monster'];
 
         if(isset($scramble_result['over_time'])){
-            $room['session_data']['statuses']['over_time'] = (isset($room['session_data']['statuses']['over_time']))? array_merge($room['session_data']['statuses']['over_time'],$scramble_result['over_time']):$scramble_result['over_time'];
+            $_fight->update_over_time($scramble_result['over_time']);
         }
         if($scramble_result['defence_status'] == 'die'){
-            $room = $this->_monster_die($room,$_defence_user_id,$_defence_monster_id);
+            $_fight->monster_repose($_defence_user_id,$_defence_monster_id);
         }
 
-        $room = $this->_round_action($room,$attack_user_id);
+        $_fight = $this->_round_action($_fight,$attack_user_id);
 
-        $this->fight_session->update_fight_session_data($room);
-        $this->_users_actions($room['session_data']);
+        $_fight->update_fight_session_data();
+
+        $_fight->_users_actions();
     }
 
     public function action_change($session_id, $user_id, $monster_id){
 
-        $room = $this->fight_session->check_fight_session_data($session_id);
-        $this->_security_method($room, $user_id);
+        $_fight = $this->fight_session;
+        $_fight->init_fight($session_id);
+        $_fight->_security_method($user_id);
 
-        if(!isset($room['session_data']['users'][$user_id][$monster_id])){
+        if(!isset($_fight->session_data->users->{$user_id}->{$monster_id})){
             error('Error. You don`t have this monster');
         }
 
-        if(isset($room['session_data']['statuses']['die'][$monster_id]) && in_array($monster_id,$room['session_data']['statuses']['die'][$monster_id])){
+        if(isset($_fight->session_data->statuses->die->{$user_id}) && in_array($monster_id,$_fight->session_data->statuses->die->{$user_id})){
             error('Error. This monster already die');
         }
 
-        $room['session_data']['statuses']['user_'. $user_id .'_active_monster'] = $monster_id;
-        $this->fight_session->update_fight_session_data($room);
+        $_fight->session_data->statuses->{'user_'. $user_id .'_active_monster'} = $monster_id;
 
-        $this->_users_actions($room['session_data']);
+        $_fight->update_fight_session_data();
+
+        $_fight->_users_actions();
     }
 
-    private function _round_action($room,$action_user){
+    private function _round_action($fight,$action_user){
 
-        if($room['session_data']['statuses']['first_move_user'] == $action_user){
-            $room['session_data']['statuses']['round_action'] = 'middle';
+        if($fight->session_data->statuses->first_move_user == $action_user){
+            $fight->session_data->statuses->round_action = 'middle';
         }else{
-            $room['session_data']['statuses']['round_action'] = 'begin';
-            $room['session_data']['statuses']['round']++ ;
-            $room = $this->_over_time_action($room);
+            $fight->session_data->statuses->round_action = 'begin';
+            $fight->session_data->statuses->round++ ;
+            $fight->action_over_time();
         }
 
-        $room = $this->_check_winner($room);
+        $fight = $this->_check_winner($fight);
 
-        return $room;
+        return $fight;
     }
 
-    private function _check_winner($room){
+    private function _check_winner($fight){
 
-        if(!isset($room['session_data']['statuses']['die']))
-            return $room;
+        if(count($fight->session_data->statuses->die) == 0)
+            return $fight;
 
         $lost = array();
         $winner = array();
-        foreach ($room['session_data']['statuses']['die'] as $user_id => $user_monsters){
-            if(count($user_monsters) == 3){
+        foreach ($fight->session_data->statuses->die as $user_id => $user_monsters){
+            foreach ($user_monsters as $monster){
+                $_die[$user_id][] = $monster;
+            }
+            if(count($_die[$user_id]) == 3){
                 $lost[] = $user_id;
             }else{
                 $winner[] = $user_id;
@@ -137,109 +140,40 @@ class Room_controller extends CI_Controller
 
         switch (count($lost)){
             case 0:
-                $room['session_data']['statuses']['message'] = 'Round '.  $room['session_data']['statuses']['round'];
+                $fight->session_data->statuses->message = 'Round '.  $fight->session_data->statuses->round;
                 break;
             case 1:
-                $room['session_data']['statuses']['message'] = 'User '. $winner[0] .' winner!';
-                $this->close_room($room['session_id'],ROOM_STATUS_CLOSED,$winner[0]);
+                $fight->session_data->statuses->message = 'User '. $winner[0] .' winner!';
+                $this->close_room($fight->session_id,ROOM_STATUS_CLOSED,$winner[0]);
+                $this->experience->add_user_exp($winner[0]);
                 break;
             case 2:
-                $room['session_data']['statuses']['message'] = 'Friendship won :D';
-                $this->close_room($room['session_id'],ROOM_STATUS_CLOSED,0);
+                $fight->session_data->statuses->message = 'Friendship won :D';
+                $this->close_room($fight->session_id,ROOM_STATUS_CLOSED,0);
                 break;
         }
 
-        return $room;
-    }
-
-    private function _over_time_action($room){
-
-        if(!isset($room['session_data']['statuses']['over_time']))
-            return $room;
-
-        foreach ($room['session_data']['statuses']['over_time'] as $action){
-
-            switch ($action['type']){
-
-                case 'damage':
-
-                    $room['session_data'][$action['user_id']][$action['monster_id']]['fight_data']['health'] -= $action['value'];
-                    if($room['session_data'][$action['user_id']][$action['monster_id']]['fight_data']['health'] <= 0){
-                        $room = $this->_monster_die($room,$action['user_id'],$action['monster_id']);
-                    }
-
-                    break;
-
-
-                case 'healing':
-                    break;
-            }
-        }
-        return $room;
-    }
-
-    private function _monster_die($room,$_defence_user_id,$_defence_monster_id){
-
-        $room['session_data']['statuses']['die'][$_defence_user_id][] = $_defence_monster_id;
-        $room['session_data']['statuses']['user_'. $_defence_user_id .'_active_monster'] = $this->fight_session->check_next_life_monster($_defence_monster_id,$room['session_data']['users'][$_defence_user_id]);
-
-        return $room;
-    }
-
-    private function _security_method($room, $user_id){
-
-        if($room === false){
-            error('Error. Session error. Are you cheater? ;)');
-        }
-
-        if(
-            ( $room['session_data']['statuses']['first_move_user'] !=  $user_id &&  $room['session_data']['statuses']['round_action'] == 'begin') ||
-            ( $room['session_data']['statuses']['first_move_user'] ==  $user_id &&  $room['session_data']['statuses']['round_action'] != 'begin')
-        ){
-            error('Error. Don`t you move. Are you cheater? ;)');
-        }
-
-
+        echo $fight->session_data->statuses->message;
+        return $fight;
     }
 
     //вызываем, если истек срок ожидания
     //вызываем для объявления победителя
     //возможно, необходимо будет разнести функционал
     public function close_room($session_id,$status,$winner_id){
-        $room = $this->fight_session->check_fight_session_data($session_id);
+        $_fight = $this->fight_session;
+        $_fight->init_fight($session_id);
 
-        if($room === false){
+        if($_fight->session_id === null){
             error('Error. Session error. Are you cheater? ;)');
         }
+        $_fight->close_session();
 
-        $_room = $this->{$this->room_type_classes[$room['room_type']]};
+        $_room = $this->{$this->room_type_classes[$_fight->room_type]};
         $_room->close_room($session_id,$status,$winner_id);
+
+        echo 'Room closed!'. PHP_EOL;
     }
 
-
-    //подсказка возможностей
-    private function _users_actions($session_data){
-        foreach ($session_data['users'] as $key => $user_data){
-            echo '-------'. PHP_EOL;
-            echo 'user_id: '. $key . PHP_EOL;
-            foreach ($user_data as $monster_id => $monster){
-                echo '-------'. PHP_EOL;
-                echo 'monster_id: '. $monster_id . PHP_EOL;
-                echo 'health: '. $monster['fight_data']['health'] . PHP_EOL;
-                echo 'speed: '. $monster['fight_data']['speed'] . PHP_EOL;
-                foreach ($monster['fight_data']['skills'] as $skill_id => $skill){
-                    echo 'skill_id: '. $skill_id .' damage: '. $skill['damage'] .', healing:'. $skill['healing'] .', healingpct :'. $skill['healingpct'] .' , duration: '. $skill['duration'] .PHP_EOL;
-                }
-            }
-            echo '-------'. PHP_EOL;
-        }
-//        $_str ='';
-//        foreach ($session_data['statuses'] as $key => $val){
-//            $_str .= $key .': '. $val .', ';
-//        }
-//        echo $_str;
-        print_r($session_data['statuses']);
-
-    }
 
 }

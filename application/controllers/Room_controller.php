@@ -128,10 +128,7 @@ class Room_controller extends CI_Controller
         $lost = array();
         $winner = array();
         foreach ($fight->session_data->statuses->die as $user_id => $user_monsters){
-            foreach ($user_monsters as $monster){
-                $_die[$user_id][] = $monster;
-            }
-            if(count($_die[$user_id]) == 3){
+            if(count($user_monsters) == 3){
                 $lost[] = $user_id;
             }else{
                 $winner[] = $user_id;
@@ -144,12 +141,16 @@ class Room_controller extends CI_Controller
                 break;
             case 1:
                 $fight->session_data->statuses->message = 'User '. $winner[0] .' winner!';
-                $this->close_room($fight->session_id,ROOM_STATUS_CLOSED,$winner[0]);
+                $fight->close_session();
+                $this->close_room($fight->session_id,$fight->room_type,ROOM_STATUS_CLOSED,$winner[0]);
+
                 $this->experience->add_user_exp($winner[0]);
                 break;
             case 2:
+
                 $fight->session_data->statuses->message = 'Friendship won :D';
-                $this->close_room($fight->session_id,ROOM_STATUS_CLOSED,0);
+                $fight->close_session();
+                $this->close_room($fight->session_id,$fight->room_type,ROOM_STATUS_CLOSED,0);
                 break;
         }
 
@@ -160,16 +161,10 @@ class Room_controller extends CI_Controller
     //вызываем, если истек срок ожидания
     //вызываем для объявления победителя
     //возможно, необходимо будет разнести функционал
-    public function close_room($session_id,$status,$winner_id){
-        $_fight = $this->fight_session;
-        $_fight->init_fight($session_id);
+    public function close_room($session_id,$room_type,$status,$winner_id){
 
-        if($_fight->session_id === null){
-            error('Error. Session error. Are you cheater? ;)');
-        }
-        $_fight->close_session();
 
-        $_room = $this->{$this->room_type_classes[$_fight->room_type]};
+        $_room = $this->{$this->room_type_classes[$room_type]};
         $_room->close_room($session_id,$status,$winner_id);
 
         echo 'Room closed!'. PHP_EOL;

@@ -117,23 +117,32 @@ class Fight_session extends CI_Model
 
     private function _save_fight_session_data(){
 
-        $this->session_data = json_encode($this->session_data);
+        $_data = array(
+            'session_id'=>$this->session_id,
+            'session_data'=>json_encode($this->session_data),
+            'room_type'=>$this->room_type,
+            'status'=>$this->status
+        );
+        $this->db->insert($this->table_name,$_data);
 
-        $this->db->insert($this->table_name,$this);
 
     }
 
     public function update_fight_session_data(){
 
-        $this->session_data = json_encode($this->session_data);
-        $this->db->where('session_id',$this->session_id)->update($this->table_name,$this);
+        $_data = array(
+            'session_id'=>$this->session_id,
+            'session_data'=>json_encode($this->session_data),
+            'room_type'=>$this->room_type,
+            'status'=>$this->status
+        );
+        $this->db->where('session_id',$this->session_id)->update($this->table_name,$_data);
 
     }
 
     public function close_session(){
-        $this->session_data = json_encode($this->session_data);
         $this->status = ROOM_STATUS_CLOSED;
-        $this->db->where('session_id',$this->session_id)->update($this->table_name,$this);
+        $this->update_fight_session_data();
     }
 
     private function check_next_life_monster($current_monster,$user_id){
@@ -165,8 +174,8 @@ class Fight_session extends CI_Model
     }
 
     public function monster_repose($_defence_user_id,$_defence_monster_id){
-
-        $this->session_data->statuses->die->{$_defence_user_id}->{$_defence_monster_id} = $_defence_monster_id;
+        $this->session_data->statuses->die->{$_defence_user_id}=  (array)$this->session_data->statuses->die->{$_defence_user_id};
+        $this->session_data->statuses->die->{$_defence_user_id}[$_defence_monster_id] = $_defence_monster_id;
         $this->session_data->statuses->{'user_'. $_defence_user_id .'_active_monster'} = $this->check_next_life_monster($_defence_monster_id,$_defence_user_id);
 
     }
@@ -220,7 +229,7 @@ class Fight_session extends CI_Model
 
         $res = $this->db->get_where($this->table_name,array('session_id'=>$this->session_id))->row();
 
-        if($res === null)
+        if(!$res)
             return;
 
         $_session_data = json_decode($res->session_data);
